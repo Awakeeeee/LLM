@@ -10,6 +10,7 @@ class Tokenizer:
 	def encode(self, text):
 		preprocessed = re.split(r'([,.()?!"_\']|--|\s)', text)
 		preprocessed = [s.strip() for s in preprocessed if s.strip()]
+		preprocessed = [s if s in self.forward else "<|unk|>" for s in preprocessed]
 		ids = [self.forward[s] for s in preprocessed]
 		return ids
 
@@ -22,5 +23,6 @@ class Tokenizer:
 		#r'\s+([...])'匹配一个或多个空格接上[]内指定符号的形式,也就是那些多余的空格处
 		#r'\1'的意思是"对第一个捕获组的引用",捕获组指的是regex表达式中的括号()
 		text = re.sub(r'\s+([.,?!()"\'])', r'\1', text)
+		text = re.sub(r'(\')+([\s])', r'\1', text) #想处理it's/don't的情况,书里没处理
 		return text
 

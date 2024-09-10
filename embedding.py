@@ -23,6 +23,10 @@ if __name__ == '__main__':
 	print("preprocessed token preview: ", preprocess[:30])
 
 	tokens_set = sorted(list(set(preprocess))) #转set用于去重,但set是无序结构,所以转回list排序
+	tokens_set.extend(["<|endoftext|>", "<|unk|>"])
+	#tokens_set.extend("BOS") #begining of sequence
+	#tokens_set.extend("EOS")
+	#tokens_set.extend("PAD") #padding 用于batch text填充短文本以便让所有文本有统一长度
 	vocab_len = len(tokens_set)
 	print("vocabulary size: ", vocab_len)
 	
@@ -39,7 +43,7 @@ if __name__ == '__main__':
 
 
 	ter = Tokenizer(vocabulary)
-	print(ter.encode("I think it's done"))
-	print(ter.decode([55, 1023, 596, 2, 872, 367]))
+	print(ter.encode("what? I think it's done"))
+	print(ter.decode([1116, 10, 55, 1023, 596, 2, 872, 367]))
 	print(ter.decode([23, 35, 435, 48, 90, 612]))
 	print(ter.encode("Hello world"))
