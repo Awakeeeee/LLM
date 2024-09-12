@@ -1,14 +1,15 @@
 import torch
 import re
-from Tokenizer import Tokenizer
+from SimpleTokenizer import Tokenizer
+import tiktoken
 
 if __name__ == '__main__':
 
 	with open('theverdict.txt', 'r', encoding='utf-8') as f:
 		rawtext = f.read()
 
-	print("raw text length: ", len(rawtext))
-	print("preview:\n", rawtext[:99])
+	#print("raw text length: ", len(rawtext))
+	#print("preview:\n", rawtext[:99])
 
 
 	#taste = "Let's firstly do...a simple test."
@@ -42,8 +43,23 @@ if __name__ == '__main__':
 	#但是本质上他已经可以用来给任意原始文本做token ID映射, 只是随着规模变大他的"知识"会不够用
 
 
-	ter = Tokenizer(vocabulary)
-	print(ter.encode("what? I think it's done"))
-	print(ter.decode([1116, 10, 55, 1023, 596, 2, 872, 367]))
-	print(ter.decode([23, 35, 435, 48, 90, 612]))
-	print(ter.encode("Hello world"))
+	teststr = "Hello, do you like tea? <|endoftext|> In the sunlit terraces of the notwordno."
+	#----通过简单Tokenizer解释原理
+	#ter = Tokenizer(vocabulary)
+	#ints = ter.encode(teststr)
+	#print(ter.decode(ints))
+
+
+	#真正的Tokenizer过于复杂,直接用tiktoken库
+	#tiktoken库在本地安装有固有的词库,不需要传入某个给予小故事搞出来的词汇表
+	realter = tiktoken.get_encoding("gpt2")
+	ints = realter.encode(teststr, allowed_special={"<|endoftext|>"})
+	print(ints)
+	print(realter.decode(ints))
+
+	noword = "Akwirw ier"
+	ints = realter.encode(noword) #一般来说应该转为2个数字token,不过因为输入是个没有记载的文本,所以BPE用已知的其他token组合该文本,导致结果是多于2个token
+	print(ints)
+	for i in ints:
+		print(realter.decode([i]))
+	print(realter.decode(ints))
