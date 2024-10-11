@@ -74,6 +74,7 @@ if __name__ == "__main__":
 	print(v_pos.shape)
 
 	#最终得到了loader第一个batch对应的embedding,切其中含有位置信息
+	#注意这个+的操作,两个shape不同的张量相加实际上发生了很多事情, 基本上在这个例子里, 相当于把[4,256]复制了8份转成[8,4,256]再进行对应相加,这叫张量的"广播机制"
 	batch_eb = v + v_pos
 	print(batch_eb.shape)
 
