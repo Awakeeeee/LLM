@@ -1,5 +1,5 @@
 import torch
-from compact.SelfAttentionSystem import SASv1
+from compact.SelfAttentionSystem import SASv1, SASv2, SAS_causal
 
 #测试用输入,应该是由将文本通过nn.Embedding转出来
 inputs = torch.tensor(
@@ -95,9 +95,30 @@ def single_scaled_dot_product_attention():
 #整体感受是相比simple,scaled_dot为输入添加了一个可训练参数,当计算时不直接用输入进行,而是用封装后的中间量进行,该中间量既由输入得出,又带有可训练参数供后续调节
 #single_scaled_dot_product_attention()
 
-torch.manual_seed(123)
-sas = SASv1(inputs.shape[1], 2)
-context = sas(inputs)
-print(context)
+# torch.manual_seed(789)
+# s1 = SASv1(inputs.shape[1], 2)
+# c1 = s1(inputs)
+# print("v1:", c1)
+# torch.manual_seed(789)
+# s2 = SASv2(inputs.shape[1], 2)
+# c2 = s2(inputs)
+# print("v2:", c2)
+
+#关于书中v1 v2如何得到相同结果的实验
+#要让结果一样,就是让Linear和Parameter构造的可训练权重矩阵一样,但矩阵ctor中是随机生成的(这也是他们一开始结果不同的原因),所以考虑把一方的复制给另一方
+#拷贝前,需要搞清两个问题:
+#1.Linear和Parameter虽然都构造了可训练权重矩阵,区别是Linear内部的存储做了转置
+#2.拷贝什么字段? Linear构造后的权重储存为weight,该字段包含矩阵张量+斜率信息,通过weight.data只取其中张量部分;而Parameter则直接通过data获取张量
+# s1.wquery.data = s2.wquery.weight.data.T
+# s1.wkey.data = s2.wkey.weight.data.T
+# s1.wval.data = s2.wval.weight.data.T
+# c3 = s1(inputs)
+# print(c3) #same as c2
+
+
+torch.manual_seed(789)
+s = SAS_causal(inputs.shape[1], 2)
+c = s(inputs)
+print(c)
 
 #context咋用
